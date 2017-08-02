@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+	<classPathEntry location="D:\\Program Files\\Java\\javaweb_depending_repository\\sql\\mysql-connector-java-5.1.39-bin.jar"></classPathEntry>
+  <context id="onkshare">
+    <jdbcConnection connectionURL="jdbc:mysql://localhost:3306/onkshare" driverClass="com.mysql.jdbc.Driver" password="123456" userId="root" />
+    <javaModelGenerator targetPackage="mycourse.onkshare.model" targetProject="time-model" >
+    	<property name="enableSubPackages" value="true" /> 
+    </javaModelGenerator>
+    <sqlMapGenerator targetPackage="mycourse.onkshare.mapper" targetProject="time-mapper" >
+    	<property name="enableSubPackages" value="true" /> 
+    </sqlMapGenerator>
+    <javaClientGenerator targetPackage="mycourse.onkshare.mapper" targetProject="time-mapper" type="XMLMAPPER" >
+    	<property name="enableSubPackages" value="true" /> 
+    </javaClientGenerator>
+    
+ <!--    <commentGenerator>
+        <property name="suppressDate" value="true"/>
+        <property name="suppressAllComments" value="true" />
+    </commentGenerator> -->
+    
+    <!-- <table schema="" tableName="tb_content" domainObjectName="Content" />
+    <table schema="" tableName="tb_content_category" domainObjectName="ContentCatagory"/> -->
+    <table schema="" tableName="tb_file" domainObjectName="File" />
+ <!--    <table schema="" tableName="tb_file_cat" domainObjectName="fileCat" /> -->
+    <table schema="" tableName="tb_file_desc" domainObjectName="FileDesc" />
+<!--     <table schema="" tableName="tb_file_param" domainObjectName="fileParam" />
+    <table schema="" tableName="tb_file_param_item" domainObjectName="fileParamfile" /> -->
+<!--     <table schema="" tableName="tb_order" domainObjectName="Order" />
+    <table schema="" tableName="tb_order_file" domainObjectName="Orderfile" />
+    <table schema="" tableName="tb_order_shipping" domainObjectName="OrderShipping" /> -->
+    <table schema="" tableName="tb_user" domainObjectName="User" />
+     <table schema="" tableName="tb_folder_share" domainObjectName="FolderShare" />
+      <table schema="" tableName="tb_folder_desc" domainObjectName="FolderDesc" />
+  </context>
+</generatorConfiguration>

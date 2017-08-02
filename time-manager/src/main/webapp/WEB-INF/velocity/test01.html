@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Tree - jQuery EasyUI Demo</title>
+    <link rel="stylesheet" href="$!{basepath}/js/kindeditor-4.1.1/themes/default/default.css"/>
+    #parse("common/common.html")
+    #parse("common/common-easyui.html")
+    <script type="text/javascript" src="$!{basepath}/js/kindeditor-4.1.1/kindeditor.js"></script>
+    <script type="text/javascript" src="$!{basepath}/js/kindeditor-4.1.1/lang/zh_CN.js"></script>
+    <script type="text/javascript" charset="utf-8" src="$!{basepath}/js/local/common.js"></script>
+    <body>
+<form id="upload-folder-form"  enctype="multipart/form-data" method="post" style="display: none">
+    <input id="upload-folder-input" name="uploadFiles" type="file" onchange="uploadFolder()"/>
+    <input type="hidden" name="uploadPathId" folder=""/>
+    <!--<input type="reset" name="re" value="dsf" style="display: none"/>-->
+    <!--<a href="javascript:void(0)" class="easyui-linkbutton" onclick="uploadFolder()">提交</a>-->
+</form>
+<button onclick="buttonT()">bu</button>
+<script >
+    function buttonT() {
+        $("#upload-folder-input").click();
+    }
+</script>
+</body>
+</html>

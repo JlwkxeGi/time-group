@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/time-client/time-client.iml" filepath="$PROJECT_DIR$/time-client/time-client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/time-common/time-common.iml" filepath="$PROJECT_DIR$/time-common/time-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/time-dao/time-dao.iml" filepath="$PROJECT_DIR$/time-dao/time-dao.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/time-group.iml" filepath="$PROJECT_DIR$/.idea/time-group.iml" />
+      <module fileurl="file://$PROJECT_DIR$/time-manager/time-manager.iml" filepath="$PROJECT_DIR$/time-manager/time-manager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/time-mapper/time-mapper.iml" filepath="$PROJECT_DIR$/time-mapper/time-mapper.iml" />
+      <module fileurl="file://$PROJECT_DIR$/time-model/time-model.iml" filepath="$PROJECT_DIR$/time-model/time-model.iml" />
+      <module fileurl="file://$PROJECT_DIR$/time-parent/time-parent.iml" filepath="$PROJECT_DIR$/time-parent/time-parent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/time-search/time-search.iml" filepath="$PROJECT_DIR$/time-search/time-search.iml" />
+      <module fileurl="file://$PROJECT_DIR$/time-service/time-service.iml" filepath="$PROJECT_DIR$/time-service/time-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/time-service-api/time-service-api.iml" filepath="$PROJECT_DIR$/time-service-api/time-service-api.iml" />
+    </modules>
+  </component>
+</project>

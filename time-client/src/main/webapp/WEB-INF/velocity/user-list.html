@@ -1,0 +1,272 @@
+<table class="easyui-datagrid" id="userList" title="用户列表"
+       data-options="singleSelect:false,
+                    fix:false,
+                    collapsible:false,
+                    pagination:true,
+       				url:'$!{basepath}/user/list',
+       				method:'get',
+       				pageSize:20,
+       				fitColumns: true,
+       				rownumbers:true,
+       				toolbar:'#toolbar'">
+    <thead>
+    <tr>
+        <th data-options="field:'ck',checkbox:true"></th>
+        <th data-options="field:'id'">用户ID</th>
+        <th data-options="field:'username'">用户名</th>
+        <th data-options="field:'password'">密码</th>
+        <th data-options="field:'phone'">手机号</th>
+        <th data-options="field:'email',align:'right'">email</th>
+        <th data-options="field:'status',align:'center'">状态</th>
+        <th data-options="field:'created',align:'center'">创建日期</th>
+        <th data-options="field:'updated',align:'center'">更新日期</th>
+    </tr>
+    </thead>
+</table>
+
+
+
+<div id="toolbar" style="height:auto">
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true" onclick="append()">Append</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="remove()">Remove</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true" onclick="getChanges()">GetChanges</a>
+</div>
+<div id="user-append-window" style="display: none">
+    <form id="append-user-window-form" action="$!{basepath}/user/append" method="post">
+        <div style="margin-left: 50px;margin-top: 50px;">
+            <div style="margin-bottom:20px;">
+                <div>
+                    用户名: <input id="append-user-username" name="username" class="easyui-textbox append-user-cl" data-options="required:true"  style="width:200px;height:32px"/>
+                </div>
+            </div>
+            <div style="margin-bottom:20px">
+                <div>
+                    密&nbsp;&nbsp;码: <input id="append-user-password" name="password" type="password" class="easyui-textbox append-user-cl" type="text" style="width:200px;height:32px" data-options="required:true"/>
+                </div>
+            </div>
+            <div style="margin-bottom:20px;">
+                <div>
+                    电&nbsp;&nbsp;话: <input id="append-user-phone" name="phone" class="easyui-textbox append-user-cl" type="number" value="" style="width:200px;height:32px"/>
+                </div>
+            </div>
+            <div style="margin-bottom:20px">
+                <div>
+                    邮&nbsp;&nbsp;箱: <input id="append-user-email" name="email" class="easyui-textbox append-user-cl" type="email" value="" style="width:200px;height:32px" />
+                </div>
+            </div>
+            <div style="margin-bottom:20px;">
+                <div>
+                    状&nbsp;&nbsp;态: <input id="append-user-status" name="status" class="easyui-textbox append-user-cl" type="number" value="" style="width:200px;height:32px"/>
+                </div>
+            </div>
+            <div>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a id="submit-append-user-a"  class="easyui-linkbutton"  iconCls="icon-ok" style="width:200px;height:32px;margin-left: 0px;" onclick="appendUser()">添加</a>
+            </div>
+        </div>
+    </form>
+</div>
+<div id="user-details-window" style="display: none">
+    <form id="update-user-window-form" action="$!{basepath}/user/update" method="post">
+        <div style="margin-left: 50px;margin-top: 50px;">
+            <div style="margin-bottom:20px; display: none">
+                <div>
+                    <span id="rowIndex"></span>
+                </div>
+            </div>
+            <div style="margin-bottom:20px">
+                <div>
+                    <input name="id"  type="hidden" value=""/>
+                </div>
+            </div>
+            <div style="margin-bottom:20px;">
+                <div>
+                    用户名: <input id="update-user-username" name="username" class="easyui-textbox update-user-cl" data-options="required:true" style="width:200px;height:32px"/>
+                </div>
+            </div>
+            <div style="margin-bottom:20px">
+                <div>
+                    密&nbsp;&nbsp;码: <input id="update-user-password" name="password" class="easyui-textbox update-user-cl" type="text" style="width:200px;height:32px" data-options="required:true"/>
+                </div>
+            </div>
+            <div style="margin-bottom:20px;">
+                <div>
+                    电&nbsp;&nbsp;话: <input id="update-user-phone" name="phone" class="easyui-textbox update-user-cl" type="number" style="width:200px;height:32px"/>
+                </div>
+            </div>
+            <div style="margin-bottom:20px">
+                <div>
+                    邮&nbsp;&nbsp;箱: <input id="update-user-email" name="email" class="easyui-textbox update-user-cl" type="email" style="width:200px;height:32px" />
+                </div>
+            </div>
+            <div style="margin-bottom:20px;">
+                <div>
+                    状&nbsp;&nbsp;态: <input id="update-user-status" name="status" class="easyui-textbox update-user-cl" type="number" style="width:200px;height:32px"/>
+                </div>
+            </div>
+            <div>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a id="open-edit-user-a"  class="easyui-linkbutton" iconCls="icon-ok" style="width:200px;height:32px;margin-left: 0px" onclick="enableUserEdit()">编辑</a>
+            </div>
+            <div>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a id="submit-user-a"  class="easyui-linkbutton" disabled="true"  iconCls="icon-ok" style="width:200px;height:32px;margin-left: 0px;" onclick="userUpdate()">更新</a>
+            </div>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+
+    var userAppendWindow =  $("#user-append-window");
+    var userDetailsWindow =  $("#user-details-window");
+    var userList = $("#userList");
+
+    $(userList).datagrid({
+        onDblClickRow: function (rowIndex, rowData) {
+            userDetails(rowIndex, rowData);
+        }
+    });
+
+    function enableUserEdit() {
+        $("#open-edit-user-a").linkbutton("disable");
+        $("#submit-user-a").linkbutton("enable");
+        $(".easyui-textbox").textbox("readonly", false);
+    }
+
+    function disableUserEdit() {
+        $(".append-user-cl").textbox("readonly");
+        $("#open-edit-user-a").linkbutton("enable");
+        $("#submit-user-a").linkbutton("disable");
+    }
+    
+    /**
+     * append-form
+     */
+    function appendUser() {
+        $('#append-user-window-form').form({
+            url: "$!{basepath}/user/append",
+            onSubmit: function () {
+                return $(this).form('validate');
+            },
+            success: function (result) {
+                var json = eval("(" + result + ")");
+                $.messager.show({
+                    title:'添加信息',
+                    msg: json.message,
+                });
+                /*
+                 更新信息
+                 */
+                $(userList).datagrid('insertRow',{
+                    row:{
+                        id:json.object.id,
+                        username:json.object.username,
+                        password:json.object.password,
+                        phone:json.object.phone,
+                        email:json.object.email,
+                        status:json.object.status,
+                        created:json.object.created,
+                        updated:json.object.updated,
+                    }
+                });
+                $('#append-user-window-form').form("reset");
+                userAppendWindow.window("close");
+
+            }
+        });
+        $("#append-user-window-form").submit();
+    }
+
+    /**
+     * update-Form
+     */
+    function userUpdate() {
+        $('#update-user-window-form').form({
+            url: "$!{basepath}/user/update",
+            onSubmit: function () {
+                return $(this).form('validate');
+            },
+            success: function (result) {
+                var json = eval("(" + result + ")");
+                $.messager.show({
+                    title:'添加信息',
+                    msg: json.message,
+                });
+                /*
+                    更新信息
+                 */
+                $(userList).datagrid('updateRow',{
+                    index: $("#rowIndex").html(),
+                    row:{
+                        id:json.object.id,
+                        username:json.object.username,
+                        password:json.object.password,
+                        phone:json.object.phone,
+                        email:json.object.email,
+                        status:json.object.status,
+                        created:json.object.created,
+                        updated:json.object.updated,
+                    }
+                });
+
+                disableUserEdit();
+                $('#update-user-window-form').form("reset");
+                userDetailsWindow.window("close");
+
+            }
+        });
+        $("#update-user-window-form").submit();
+    }
+
+    function append() {
+        $("#user-append-window").window({
+            title: "append",
+            width:800,
+            height:600,
+            modal:true
+        });
+    }
+
+    function remove() {
+        var data = $(userList).datagrid("getChecked");
+        var indexs=[];
+        for (var i =0; i < data.length; i++) {
+            var index = $(userList).datagrid("getRowIndex",data[i]);
+            indexs[i] = index;
+        }
+        console.log(indexs);
+        var ids ="";
+        for (var i=0; i < data.length; i++) {
+            ids += data[i].id + ",";
+        }
+        $.messager.confirm("确认", "确定删除!!", function (r) {
+            if (r) {
+                $.post("$!{basepath}/user/remove",{"ids":ids}, function (result) {
+                           if (result.error == 0) {
+                               for (var i=0; i<indexs.length; i++) {
+                                   $(userList).deleteRow(indexs[i]);
+                               }
+                           }
+                            myMessager(result.message);
+                });
+                return true;
+            }
+        });
+    }
+
+    function userDetails(rowIndex, rowData) {
+        $(".update-user-cl").textbox("readonly");
+        $("#rowIndex").html(rowIndex);
+        $("#update-user-window-form input[name=id]").val(rowData.id);
+        $("#update-user-username").textbox("setValue" , rowData.username);
+        $("#update-user-password").textbox("setValue" , rowData.password);
+        $("#update-user-phone").textbox("setValue" , rowData.phone);
+        $("#update-user-email").textbox("setValue" , rowData.email);
+        $(userDetailsWindow).window({
+            title: "update",
+            width:800,
+            height:600,
+            modal:true
+        });
+    }
+</script>
+
+
+

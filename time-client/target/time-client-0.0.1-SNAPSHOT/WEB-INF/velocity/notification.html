@@ -1,0 +1,227 @@
+<link rel="stylesheet" href="$!{basepath}/js/kindeditor-4.1.1/themes/default/default.css"
+	  xmlns="http://java.sun.com/jsf/html"/>
+
+<script type="text/javascript" src="$!{basepath}/js/kindeditor-4.1.1/kindeditor.js"></script>
+<script type="text/javascript" src="$!{basepath}/js/kindeditor-4.1.1/lang/zh_CN.js"></script>
+<style>
+/*	.easyui-layout {
+		width: 100%;
+		max-width: 720px;
+	}*/
+
+	* {
+		padding: 0;
+		margin: 0;
+	}
+
+	[class^="icon-"]:before, [class*=" icon-"]:before {
+		font-family: "fontello";
+		font-style: normal;
+		font-weight: normal;
+		speak: none;
+		display: inline-block;
+		text-decoration: inherit;
+		width: 1em;
+		margin-right: .2em;
+		text-align: center;
+		font-variant: normal;
+		text-transform: none;
+		line-height: 1em;
+		margin-left: .2em;
+	}
+	.icon-phone-outline:before {
+		content: '\eb0f';
+	}
+	.icon-direction-outline:before {
+		content: '\eb21';
+	}
+	.icon-picture-outline:before {
+		content: '\ead1';
+	}
+	#wdc_index {
+		padding: 10px;
+	}
+	#wdc_index, li {
+		list-style: none;
+	}
+	#wdc_index li {
+		float: left;
+		background-color: #FFFFFF;
+		box-shadow: 1px 1px 2px #e3e3e5, -1px -1px 2px #e3e3e5;
+		border: 1px solid #dbdbdd;
+		width: 100%;
+		margin-bottom: 10px;
+	}
+	#wdc_index li .wdc_a {
+		text-decoration: none;
+		color: #5e6060;
+		display: block;
+		padding: 10px 5px;
+		overflow: hidden;
+		border-bottom: 1px solid #dbdbdd;
+	}
+	#wdc_index .wdc_img {
+		width: 60px;
+		height: 60px;
+		float: left;
+		margin-right: 5px;
+		border-radius: 3px;
+		overflow: hidden;
+	}
+	#wdc_index .wdc_img img {
+		width: 100%;
+		height: 100%;
+	}
+	.wdc_dis {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		-o-text-overflow: ellipsis;
+		white-space: nowrap;
+		width: 70%;
+	}
+	#wdc_index h1 {
+		font-size: 1em;
+		font-weight: 100;
+		line-height: 32px;
+	}
+	#wdc_index h2 {
+		font-size: 0.8em;
+		font-weight: 100;
+		color: #969696;
+	}
+	.wdc_p {
+		height: 25px;
+		text-align: center;
+		padding: 5px 0;
+	}
+	.wdc_p a {
+		width: 33.2%;
+		display: block;
+		float: left;
+		line-height: 25px;
+		border-right: 1px solid #e8eaeb;
+		color: #36b35f;
+		text-decoration: none;
+	}
+	.wdc_p a:last-child {
+		border-right: 0px;
+	}
+	.wdc_p i {
+		font-style: normal;
+		font-size: 0.8em;
+	}
+	.wdc_p i[class*="icon"] {
+		font-size: 0.9em;
+	}
+</style>
+
+<div class="easyui-layout" data-options="fit:true" style="width:auto;height:720px;" >
+	<div  data-options="region:'center',split:true ,iconCls:'icon-ok'" title="公告" style="width:70%;">
+		<div id="notification-content" >
+			<ul id="wdc_index">
+				<li>
+					<div class="wdc_img">
+						<img src="$!{basepath}/static-file/portrait86x86.png"/>
+					</div>
+					<h1  class="wdc_dis">站长</h1>
+				</li>
+			</ul>
+		</div>
+		<div></div>
+		<div id="notification-pagination-div" ></div>
+	</div>
+
+</div>
+<script type="text/javascript">
+
+	var notificationContent = $("#notification-content");
+
+	//
+	var notificationUrl = "$!{basepath}/notification/show"
+	//分页
+	var notificationPageNumber = 1;
+	var notificationPageSize = 10;
+
+    /**
+	 * 显示公告
+     */
+    showNotification();
+	function showNotification() {
+        $.get(notificationUrl, function (result) {
+            //var json = eval("(" + result + ")");
+            var element = $("#wdc_index").children()[0];
+            $(element).hide();
+            $("#wdc_index").html("");
+            $("#wdc_index").append(element);
+            var notifications = result.rows;
+            for (var i =0; i< notifications.length;  i++) {
+                var div = "<div  id='notification-"+ notifications[i].id +"' notification-id='" + notifications[i].id + "' >" + notifications[i].content + "</div>";
+                var copy = $(element).clone();
+                copy.append(div);
+                copy.show();
+                $("#wdc_index").append(copy);
+            }
+
+            //添加分页信息
+            notificationPagination(result.total, result.pageNumber, result.pageSize);
+        });
+    }
+
+    /**
+	 * 新增
+     */
+   /* function appendNotification() {
+		$(notificationForm).form({
+            url: "$!{basepath}/notification/append",
+            onSubmit: function () {
+                return $(this).form('validate');
+            },
+            success: function (data) {
+				var result = eval("(" + data + ")");
+                myMessager(result);
+                var div = "<div  id='notification-"+ result.object.id +"' notification-id='"+ result.object.id +"' style='margin-left: 30px; margin-top: 15px; border: 1px solid red'>" + result.object.content + "&nbsp;&nbsp;&nbsp;&nbsp;<a href='javascript:void(0)' onclick='removeNotification(this)' >删除</a></div>";
+                $(notificationContent).append(div);
+                $(notificationForm).form("reset")
+            }
+        });
+        $(notificationForm).submit();
+    }*/
+
+    /**
+     * 分页
+     */
+    function notificationPagination(dataTotal, pageNumber, pageSize) {
+        $("#notification-pagination-div").pagination({
+            total:dataTotal,
+            pageSize:pageSize,
+            pageNumber: pageNumber,
+            pageList:[10,20,40],
+            showPageList:true,
+            showRefresh: true,
+            layout:['list','sep','first','prev','links','next','last','sep','refresh'],
+            onSelectPage: function (number, size) {
+                notificationUrl = "$!{basepath}/notification/show?s=" + number + "&e=" + size;
+				showNotification();
+            },
+            onChangePageSize: function (pageSize) {
+                //pagePoint = pageSize;
+            }
+        });
+    }
+
+    /**
+	 * 移除notification
+     */
+   /* function removeNotification(a) {
+		console.log($(a).parent().attr("notification-id"));
+        $.messager.confirm('确认','您确认想要删除记录吗？',function(r){
+            if (r){
+                $.get("$!{basepath}/notification/remove", {id:$(a).parent().attr("notification-id")} , function (result) {
+					myMessager(result);
+                });
+            }
+        });
+
+    }*/
+
+</script>

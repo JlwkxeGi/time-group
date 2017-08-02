@@ -1,0 +1,1129 @@
+<link rel="stylesheet" href="$!{basepath}/js/kindeditor-4.1.1/themes/default/default.css"
+      xmlns="http://java.sun.com/jsf/html"/>
+
+<script type="text/javascript" src="$!{basepath}/js/kindeditor-4.1.1/kindeditor.js"></script>
+<script type="text/javascript" src="$!{basepath}/js/kindeditor-4.1.1/lang/zh_CN.js"></script>
+
+<style>
+    .floor, .time {
+        margin-right: 10px;
+    }
+</style>
+
+    <div class="easyui-layout" data-options="fit:true" style="width:auto;height:720px;" >
+        <div style="display: none">
+            <form id="upload-folder-form"  enctype="multipart/form-data" method="post" >
+                <input id="upload-folder-input" name="uploadFiles" type="file" onchange="uploadFolder()"  webkitdirectory />
+                <input type="hidden" name="uploadPathId" folder=""/>
+            </form>
+            <form id="upload-files-form"  enctype="multipart/form-data" method="post" >
+                <input id="upload-files-input" name="uploadFiles" type="file" onchange="uploadMultiFile()" multiple />
+                <input type="hidden" name="uploadPathId" folder=""/>
+            </form>
+            <form id="copy-files-form"  enctype="multipart/form-data" method="post" >
+                <input id="copy-files-input" name="cIds" value="" />
+                <input id="target-folder" name="tfId" value="">
+            </form>
+        </div>
+
+        <div id="tree-div" data-options="region:'center',split:true ,iconCls:'icon-ok'" title="文件"   style="height:auto">
+            <div id="rightclick" class="easyui-menu" style="width: 115px;">
+                <div data-options="iconCls:'icon-search',name:'downloadFile'">下载</div>
+                <div data-options="iconCls:'icon-add',name:'upload'">
+                    <span>upload</span>
+                    <div>
+                        <div data-options="iconCls:'icon-add',name:'uploadFiles'">上传文件</div>
+                        <div data-options="iconCls:'icon-add',name:'uploadFolder'">上传文件夹</div>
+                    </div>
+                </div>
+                <div id="look-file-model-div" data-options="iconCls:'icon-add',name:'view'">
+                    <span>查看</span>
+                    <div>
+                        <div data-options="iconCls:'icon-search',name:'viewAll'">查看所有</div>
+                        <!--<div data-options="iconCls:'icon-search',name:'viewCurrentAll'">查看本用户所有</div>-->
+                        <div data-options="iconCls:'icon-search',name:'viewCurrentShared'">只查看已分享</div>
+                    </div>
+                </div>
+                <div data-options="iconCls:'icon-add',name:'share'">
+                    <span>设置分享</span>
+                    <div>
+                        <div data-options="iconCls:'icon-search',name:'closeEditShare'">关闭编辑</div>
+                        <div data-options="iconCls:'icon-search',name:'editShare'">编辑分享</div>
+                        <div data-options="iconCls:'icon-search',name:'updateShare'">更新分享</div>
+                    </div>
+                </div>
+                <div data-options="iconCls:'icon-add',name:'copy'">复制到</div>
+                <div data-options="iconCls:'icon-add',name:'append'">append</div>
+                <div data-options="iconCls:'icon-edit',name:'update'">update</div>
+                <div data-options="iconCls:'icon-remove',name:'remove'">remove</div>
+            </div>
+            <ul  id="file-tree"></ul>
+            <div id="file-pagination-div" style="display: none"></div>
+        </div>
+        <div  data-options="region:'east',split:true" title="文件信息" style="width:60%; padding: 5px;">
+            <div id="accordion-div" class="easyui-accordion" data-options="fit:true,border:false" >
+                <div id="description-div" title="文件详情"  style="padding:10px;">
+                </div>
+                <div id="brief-div" data-options=" selected:true" title="文件简述" style="padding:10px;">
+                </div>
+                <div id="comment-div" data-options=" selected:true" title="文件评论" style="padding:10px;">
+                    <div id="file-comment-element-div">
+                    </div>
+                    <div id="file-comment-pagination-div"></div>
+                    <!--commentElement-->
+                    <div id="file-comment-reply-div" style="display: none">
+                        <form id="file-comment-form" style="margin-top: 21px; margin-left: 30px;">
+                            <input type="hidden" name="id" value=""/>
+                            <input type="hidden" name="floor" value="0"/>
+                            <input type="hidden" name="fid" value="0"/>
+                            <textarea id="reply-file-kind-text" name="content" style="width:630px;height:300px;visibility:hidden;">
+                            </textarea>
+                            <div style="padding:5px">
+                                <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitFileComment()">回复</a>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="index-file-comment-reply-div" style="display: none">
+                        <form id="index-file-comment-form" style="margin-top: 21px; margin-left: 30px;">
+                            <input type="hidden" name="id" value="0"/>
+                            <input type="hidden" name="floor" value="0"/>
+                            <input type="hidden" name="fid" value="0"/>
+                            <textarea id="index-file-reply-kind-text" name="content" style="width:630px;height:300px;visibility:hidden;">
+                            </textarea>
+                            <div style="padding:5px">
+                                <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitIndexFileComment()">回复</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="edit-dialog">
+            <div id="rightclick-file-edit" class="easyui-menu" style="width: 115px;">
+                <div data-options="iconCls:'icon-add',name:'edit'">写详细描述</div>
+            </div>
+        </div>
+        <div id="file-descrition-edit" style="padding:10px 10px 10px 10px; display: none">
+            <form id="file-detail-form" class="itemForm" method="post" enctype="multipart/form-data">
+                <table cellpadding="3">
+                    <tr>
+                        <td>文件标题:</td>
+                        <td id="edit-window-td-title"></td>
+                    </tr>
+                    <tr>
+                        <td>文件简述:</td>
+                        <td ><input id="edit-window-td-brief" type="text" name="attraction"/></td>
+                    </tr>
+                    <tr>
+                        <td>文件描述:</td>
+                        <td>
+                            <input id="edit-window-td-id" type="hidden" name="detailsId"/>
+                            <textarea id="editor_content" style="width:630px;height:300px;visibility:hidden;" name="desc"></textarea>
+                        </td>
+                    </tr>
+                </table>
+                <input type="hidden" name="itemParams"/>
+            </form>
+            <div style="padding:5px">
+                <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()">提交</a>
+            </div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+
+    //
+    var treeF = $("#file-tree");
+    var treeUrl = '$!{basepath}/file/list?pag=1';
+    var isGetP = true;
+    var currentSelectNode;
+
+    var fileCommentKind;
+
+    //
+    var fileCommentLastFloor;
+    var fileCommentForm = $("#file-comment-form") ;
+    var indexFileCommentForm = $("#index-file-comment-form");
+    var fileCommentPageNumber = 1;
+    var fileCommentPageSize = 10;
+    var fileCommentPaginationUrl = "$!{basepath}/fc/comment";
+    var fileCommentDiv = $("#file-comment-element-div");
+    var replyFileCommentWindow = $("#file-comment-reply-div");
+
+    //复制文件标记
+    var ctrlDown = false;
+    var ctrlUp = false;
+    var selectIds = [];
+    var copyToTarget = "";
+
+    var copyFilesForm = $("#copy-files-form");
+    var copyTree;
+
+
+
+    /**
+     * 文件上传
+     *
+     */
+    function uploadMultiFile() {
+        var node = treeF.tree('getSelected');
+        var files =  $("#upload-files-input").val();
+        if (!files) {
+            return;
+        }
+        $('#upload-files-form').form({
+            url: "$!{basepath}/file/uploadFolder",
+            onSubmit: function () {
+                var pathId = $("#upload-files-form > input[name='uploadPathId']");
+                var flag = false;
+                if ( $(pathId).val() ) {
+                    flag = true;
+                }
+                if ($(pathId).attr("folder") == "false") {
+                    alert("请选择文件夹!!");
+                    flag = false;
+                }
+                if (flag) {
+                    return true;
+                }
+                alert("请先选择文件夹!!");
+                $("#upload-files-form").form("reset");
+                return false;
+                // return $(this).form('validate');
+            },
+            success: function (result) {
+                var json = eval("(" + result + ")");
+                $.messager.show({
+                    title:'添加信息',
+                    msg: json.result.message,
+                });
+                $("#upload-files-form").form("reset");
+                treeF.tree("reload", node.target);
+
+                /*
+                 同步文件设置
+                 */
+
+            }
+        });
+        $("#upload-files-form").submit();
+    }
+
+
+
+    /**
+     * 文件夹上传
+     */
+    function uploadFolder() {
+        var node = treeF.tree('getSelected');
+        var folder =  $("#upload-folder-input").val();
+        if (!folder) {
+            return;
+        }
+        $('#upload-folder-form').form({
+            url: "$!{basepath}/file/uploadFolder",
+            onSubmit: function () {
+                var pathId = $("#upload-folder-form > input[name='uploadPathId']");
+                var flag = false;
+                if ( $(pathId).val() ) {
+                    flag = true;
+                }
+                if ($(pathId).attr("folder") == "false") {
+                    alert("请选择文件夹!!");
+                    flag = false;
+                }
+                if (flag) {
+                    return true;
+                }
+                alert("请先选择文件夹!!");
+                $("#upload-files-form").form("reset");
+                return false;
+               // return $(this).form('validate');
+            },
+            success: function (result) {
+                var json = eval("(" + result + ")");
+                $.messager.show({
+                    title:'添加信息',
+                    msg: json.result.message,
+                });
+                $("#upload-files-form").form("reset");
+                treeF.tree("reload", node.target);
+
+                /*
+                    同步文件设置
+                 */
+
+            }
+        });
+        $("#upload-folder-form").submit();
+    }
+   /* function checkPath() {
+        var val = $("input[name='uploadPathId']");
+        var flag = false;
+        if ( $("input[name='uploadPathId']").val() ) {
+            flag = true;
+        }
+        if ($("input[name='uploadPathId']").attr("folder") == "false") {
+            alert("请选择文件夹!!");
+            flag = false;
+        }
+        if (flag) {
+            return true;
+        }
+        alert("请先选择文件夹!!");
+        $("#form")[0].reset();
+        return false;
+    }*/
+
+    /**
+     * file-edit from
+     */
+    function submitForm() {
+        $('#file-detail-form').form({
+            url: "$!{basepath}/file/edit/detailsAndBrief",
+            onSubmit: function () {
+                return $(this).form('validate');
+            },
+            success: function (result) {
+                var data = eval("(" + result+")");
+                if (data.error == 0) {
+                    /*
+                        更新简述
+                     */
+                    var node = treeF.tree("getSelected");
+                    var attraction = $("#file-descrition-edit input[name=attraction]").val();
+                    treeF.tree("update",{
+                        target: node.target,
+                        attraction: attraction
+                    });
+
+                    $("#file-descrition-edit").window("close");
+                }
+                myMessager({title:'添加信息',msg: data});
+                /*
+                    更新详情
+                 */
+                $("#description-div").html(descriptionDivText);
+            }
+        });
+        $("#file-detail-form").submit();
+    }
+
+    /**
+     * accordion
+     */
+    $("#accordion-div").accordion({
+        onSelect:function (title,index) {
+            var data = treeF.tree('getSelected');
+            if (!data) {
+                return;
+            }
+
+            if (title == "文件详情") {
+                fileDetails($("#description-div"),data.id);
+            }else if (title == "文件简述"){
+                $("#brief-div").html(
+                    "<p>id: "+data.id+"<p/>" +
+                    "<p>text: "+data.text+"<p/>" +
+                    "<p>url: "+data.url+"<p/>" +
+                    "<p>state: "+data.state+"<p/>" +
+                    "<p>folder: "+data.folder+"<p/>" +
+                    "<p>attraction: "+data.attraction+"<p/>" +
+                    "<p>level: "+data.level+"<p/>" +
+                    "<p>created: "+new Date(data.created).format("yyyy-MM-dd") +"<p/>" +
+                    "<p>updated: "+new Date(data.updated ).format("yyyy-MM-dd")+"<p/>" +
+                    "<p>status: "+data.status +"<p/>" +
+                    "<p>worth: "+data.worth +"<p/>"
+                );
+            } else {
+                $("#file-comment-element-div").children().remove();
+                $("#index-file-comment-reply-div").show();
+                $("input[name='fid']").val(data.id);
+                if (fileCommentKind) {
+                    fileCommentKind.remove("index-file-reply-kind-text");
+                }
+                fileCommentPaginationUrl = "$!{basepath}/fc/comment?fid=" + data.id;
+                showFileComment(fileCommentPaginationUrl, data.id);
+                fileCommentKind = KindEditor.create('#index-file-reply-kind-text', {
+                    resizeType : 1,
+                    allowFileManager: false,
+                    items : [
+                        'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline',
+                        'removeformat', '|', 'justifyleft', 'justifycenter', 'justifyright', 'insertorderedlist',
+                        'insertunorderedlist', '|', 'emoticons',  'link'],
+                    afterBlur: function(){
+                        this.sync();
+                    }
+                });
+            }
+        },
+    });
+
+    /**
+     * accordion
+     *      --editWindow
+     */
+    $('#description-div').bind("contextmenu", function(e){
+        var right =  $('#rightclick-file-edit');
+        right.menu('show', {
+            left: e.pageX,
+            top: e.pageY
+        });
+        right.menu({
+            onClick:function(item){
+                var node = treeF.tree('getSelected');
+                if (!node) {
+                    return;
+                }
+                if( item.name == 'edit' ){
+                    var itemAddEditor;
+                    $("#file-descrition-edit").window({
+                        width:800,
+                        height:600,
+                        modal:true,
+                        onOpen: function (event, ui) {
+                            $("#file-descrition-edit").css("display", "block");
+                            $("#edit-window-td-title").html(node.text);
+                            $("#edit-window-td-id").val(node.id);
+                            $("#edit-window-td-brief").val(node.attraction);
+                            itemAddEditor = KindEditor.create('#editor_content', {
+                                resizeType : 1,
+                                allowFileManager: true,
+                                uploadJson: "picture/upload",
+                                afterUpload : function(url, data, name) {
+                                },
+                                afterBlur: function(){
+                                    descriptionDivText = this.fullHtml();
+                                    this.sync();
+                                }
+                            });
+                            itemAddEditor.html($("#description-div").html());
+                            itemAddEditor.sync();
+                        },
+                        onBeforeClose: function (event, ui) {
+                            // 关闭Dialog前移除编辑器
+                            itemAddEditor.remove('#editor_content');
+                        },
+                        onClose:function () {
+                            //$("#file-descrition-edit").css("display", "none");
+                        }
+                    });
+                }
+
+            }
+        });
+        return false;
+    });
+
+    /**
+     * 绑定文件树的keyDown事件
+     */
+    (function () {
+        /*$(treeF).bind("keydown", function (event) {
+            console.log("keyDown");
+        });*/
+        $("#tree-div").attr('tabindex', 1).keydown(function(event){
+            onTreeKeyDown(event);
+        });
+    })();
+
+    /**
+     * 绑定文件树的keyDown事件
+     */
+    (function () {
+        /*$(treeF).bind("keydown", function (event) {
+         console.log("keyDown");
+         });*/
+        $("#tree-div").attr('tabindex', 1).keyup(function(event){
+            onTreeKeyUp(event);
+        });
+    })();
+
+    /**
+     * 文件树
+     */
+    treeF.tree({
+        url: treeUrl,
+        method: 'get',
+        dnd: true,
+        lines: true,
+        formatter: function (node) {
+            if (node.status == 1) {
+                var result = "<span ><font color='blue'>*</font></span>" + "&nbsp&nbsp&nbsp<span >"+ node.text  +"</span>";
+                return result;
+            }else if (node.status == 2) {
+                var result = "<span ><font color='red'>-></font></span>" + "&nbsp&nbsp<span >"+ node.text  +"</span>";
+                return result;
+            }else if (node.status == 3) {
+                var result = "&nbsp&nbsp<span ><font color='red'>无文件 </font></span>";
+                return result;
+            }
+            var result ="&nbsp&nbsp&nbsp&nbsp<span >"+ node.text  +"</span>";
+            return result;
+        },
+        loadFilter: function (result) {
+            console.log("loadFilter");
+            if (result == null || result.length == 0) {
+                console.log("sdf;klslf;afs");
+                return result;
+            }
+            if (result != null && result.rows == null) {
+                formatDataForPagination(result);
+                return result;
+            }
+            if (isGetP) {
+                filePagination(result.total, result.pageSize, result.pageNumber);
+                isGetP = false;
+            }
+            var rows = result.rows;
+            formatDataForPagination(rows);
+            return rows;
+        },
+        onLoadSuccess:function (node,data) {
+            if(temp.isShare) {
+                treeF.tree("expandAll");
+                treeF.tree("collapseAll");
+            }
+            //return data.rows;
+            /*var all = tree.tree("getChildren");
+            console.log(all);
+            for (var j =0; j< all.length; j++) {
+                if (all[j].status == 2 && all[j].indeterminate) {
+                    //var target = tree.tree("find", all[j].id);
+                    var div = $('#' + all[j].domId + "> .tree-checkbox");
+                    div.removeClass("tree-checkbox tree-checkbox0 tree-checkbox1 tree-checkbox2");
+                    div.addClass("tree-checkbox tree-checkbox2");
+                    all[j].indeterminate = false;
+                }
+            }*/
+        },
+        onClick: function (data) {
+            $("input[name='uploadPathId']").attr("folder", data.folder);
+            $("input[name='uploadPathId']").val(data.id);
+
+            //
+            $("#brief-div").html(
+                "<p>id: "+data.id+"<p/>" +
+                "<p>text: "+data.text+"<p/>" +
+                "<p>url: "+data.url+"<p/>" +
+                "<p>state: "+data.state+"<p/>" +
+                "<p>folder: "+data.folder+"<p/>" +
+                "<p>attraction: "+data.attraction+"<p/>" +
+                "<p>level: "+data.level+"<p/>" +
+                "<p>created: "+new Date(data.created).format("yyyy-MM-dd") +"<p/>" +
+                "<p>updated: "+new Date(data.updated).format("yyyy-MM-dd") +"<p/>" +
+                "<p>status: "+data.status +"<p/>" +
+                "<p>worth: "+data.worth +"<p/>"
+            );
+            $("#accordion-div").accordion("select",1);
+
+        },
+        onDblClick: function (node) {
+            //$(this).tree('beginEdit',node.target);
+        },
+        onBeforeDrop: function (target, source, point) {
+            if (point != "append") return false;
+            var targetN = treeF.tree('getNode', target);
+            if (targetN.folder == false || targetN.folder == "false") {
+                return false;
+            }
+
+            var targetN = treeF.tree('getNode', target);
+            var children = treeF.tree('getChildren', targetN);
+            console.log(source);
+            $.post("$!{basepath}/file/move", {"parentId":targetN.id, "targetFileId": source.id}, function (result) {
+                myMessager(result);
+            });
+
+        },
+        onSelect: function(node) {
+            //currentSelectNode = node;
+            console.log("onSelect")
+            if (ctrlDown) {
+                var index = findCopyId(selectIds, node.id);
+                if(index == -1) {
+                    selectIds.push(node.id);
+                }
+                $(node.target).css({ color: "#000000", background: "#FFE48D none repeat scroll 0% 0% / auto padding-box border-box" });
+            }else {
+                for(var i =0; i< selectIds.length; i++) {
+                    var findNode = treeF.tree("find", selectIds[i]);
+                    //$(findNode.target).css({ color: "#000000", background: "#FFFFFF none repeat scroll 0% 0% / auto padding-box border-box" });
+                    $(findNode.target).removeAttr("style");
+                }
+                selectIds = [];
+                selectIds.push(node.id);
+                $(node.target).css({ color: "#000000", background: "#FFE48D none repeat scroll 0% 0% / auto padding-box border-box" });
+            }
+        },
+        onCheck: function (node, checked) {
+          console.log("sdfsdf")
+        },
+        onContextMenu:function(e, node){
+            e.preventDefault();
+            var id = node.id;
+
+            var right =  $('#rightclick');
+            right.menu('show', {
+                left: e.pageX,
+                top: e.pageY
+            });
+            right.menu({
+                onClick:function(item){
+                    if (item.name == 'viewAll') {
+                        treeF.tree("reload");
+                    }else if (item.name == 'viewCurrentAll'){
+                        var target = treeF.tree("getRoot", node.target);
+                        treeF.tree("reload", target.target);
+                    }else if (item.name == 'viewCurrentShared'){
+                        $.get("$!{basepath}/file/share/list",{"id":node.id}, function(data) {
+                            if (!data) {
+                                myMessager({title:"获取信息", msg: "获取失败!!"});
+                                return;
+                            }
+                            var result = data.rows;
+                            formatDataForPagination(result);
+                            var target = treeF.tree("getRoot", node.target);
+                            var children = treeF.tree("getChildren", target.target);
+                            for (var i = children.length - 1; i >= 0 ; i--) {
+                                treeF.tree("remove", children[i].target);
+                            }
+
+                            treeF.tree("append",{"parent":target.target, "data":result.length > 0 ? result : {'id':'','text':'',"status":3}});
+                        });
+                    }else if(item.name == 'closeEditShare') {
+                        var itemView = $("#look-file-model-div");
+                        right.menu("enableItem", itemView);
+                        var append = right.menu("findItem", 'append');
+                        right.menu("enableItem", append.target);
+                        var update = right.menu("findItem", 'update');
+                        right.menu("enableItem", update.target);
+                        var remove = right.menu("findItem", 'remove');
+                        right.menu("enableItem", remove.target);
+                        var upload = right.menu("findItem", 'upload');
+                        right.menu("enableItem", upload.target);
+                        closeShare(treeF);
+                    }else if(item.name == 'editShare') {
+                        var itemView = $("#look-file-model-div");
+                        right.menu("disableItem", itemView);
+                        var append = right.menu("findItem", 'append');
+                        right.menu("disableItem", append.target);
+                        var update = right.menu("findItem", 'update');
+                        right.menu("disableItem", update.target);
+                        var remove = right.menu("findItem", 'remove');
+                        right.menu("disableItem", remove.target);
+                        var upload = right.menu("findItem", 'upload');
+                        right.menu("disableItem", upload.target);
+                        openShare(treeF, treeUrl);
+                    }else if(item.name == 'updateShare') {
+                        var itemView = $("#look-file-model-div");
+                        right.menu("enableItem", itemView);
+                        var append = right.menu("findItem", 'append');
+                        right.menu("enableItem", append.target);
+                        var update = right.menu("findItem", 'update');
+                        right.menu("enableItem", update.target);
+                        var remove = right.menu("findItem", 'remove');
+                        right.menu("enableItem", remove.target);
+                        var upload = right.menu("findItem", 'upload');
+                        right.menu("enableItem", upload.target);
+                        updateShare(treeF);
+                    }else if (item.name == 'downloadFile') {
+                        downloadFile(treeF);
+                    }else if(item.name == 'uploadFiles') {
+                        right.menu("hide");
+                        $("#upload-files-input").click();
+                    }else if(item.name == 'uploadFolder') {
+                        right.menu("hide");
+                        $("#upload-folder-input").click();
+                    }else if( item.name == 'copy' ){
+                        $("<div id='copy-tree-window'>").html("<ul id='copy-tree'></ul><button onclick='submitCopyFiles()'>确定</button>").window({
+                            width:600,
+                            height:400,
+                            modal:true,
+                            onOpen: function () {
+                                    copyTree = $("#copy-tree").tree({
+                                        url: treeUrl,
+                                        method: 'get',
+                                        dnd: true,
+                                        lines: true,
+                                        formatter: function (node) {
+                                            if (node.status == 1) {
+                                                var result = "<span ><font color='blue'>*</font></span>" + "&nbsp&nbsp&nbsp<span >"+ node.text  +"</span>";
+                                                return result;
+                                            }else if (node.status == 2) {
+                                                var result = "<span ><font color='red'>-></font></span>" + "&nbsp&nbsp<span >"+ node.text  +"</span>";
+                                                return result;
+                                            }else if (node.status == 3) {
+                                                var result = "&nbsp&nbsp<span ><font color='red'>无文件 </font></span>";
+                                                return result;
+                                            }
+                                            var result ="&nbsp&nbsp&nbsp&nbsp<span >"+ node.text  +"</span>";
+                                            return result;
+                                        },
+                                        loadFilter: function (result) {
+                                            if (result == null || result.length == 0) {
+                                                console.log("sdf;klslf;afs");
+                                                return result;
+                                            }
+                                            if (result != null && result.rows == null) {
+                                             formatDataForPagination(result);
+                                             return result;
+                                             }
+                                            /*if (isGetP) {
+                                                filePagination(result.total, result.pageSize, result.pageNumber);
+                                                isGetP = false;
+                                            }*/
+                                            var rows = result.rows;
+                                            formatDataForPagination(rows);
+                                            return rows;
+                                        }
+                                    });
+                            }
+                        });
+                    }else if( item.name == 'append' ){
+                        $('<div id="appendFolderDialog">').html(
+                            "<label for='text'>文件夹: </label><input id='text' class='easyui-textbox' type='text' name='text' data-options='required:true'style='width: 280px;' />" +
+                            "<label for='attraction'>简述: </label><input id='attraction' class='easyui-textbox' type='text' name='text' data-options='required:true'style='width: 280px;' />").dialog({
+                            title: '对话框',
+                            iconCls:"icon-edit",
+                            collapsible: true,
+                            minimizable: true,
+                            maximizable: true,
+                            resizable: true,
+                            width: 300,
+                            height: 200,
+                            modal: true,
+                            onClose: function () {
+                            },
+                            buttons: [{
+                                text: 'Ok',
+                                iconCls: 'icon-ok',
+                                handler: function () {
+                                    var value = $("#text").val();
+                                    var attraction = $("#attraction").val();
+                                    if (!value) {
+                                        return;
+                                    }
+                                    $.post("$!{basepath}/file/addFolder" ,
+                                        {
+                                            "id":node.id,
+                                            "text":value,
+                                            "attraction":attraction
+                                        }, function(result) {
+                                            if (!result) {
+                                                $.messager.show({
+                                                    title:'添加信息',
+                                                    msg: "请求无门!!",
+                                                });
+                                                return;
+                                            }
+                                            if (result.error == 0) {
+                                                treeF.tree('append', {"parent":node.target, "data":result});
+                                            }
+                                            $.messager.show({
+                                                title:'添加信息',
+                                                msg: result.message,
+                                            });
+                                    });
+
+                                    $("#appendFolderDialog").dialog("destroy");
+                                }
+                            }, {
+                                text: 'Cancel',
+                                iconCls: 'icon-cancel',
+                                handler: function () {
+                                    $("#appendFolderDialog").dialog("destroy");
+                                }
+                            }]
+                        });
+
+                        var tempUpdateNode = treeF.tree('find',node.id);
+                        if (tempUpdateNode.folder) {
+                            treeF.tree('append',node.id);
+                        }
+                    }else if(item.name == 'update') {
+                        var tempUpdateNode = treeF.tree('find',node.id);
+                        temp.tempUpdateNode.id = tempUpdateNode.id;
+                        temp.tempUpdateNode.text = tempUpdateNode.text;
+                        temp.tempUpdateNode.url = tempUpdateNode.url;
+                        temp.tempUpdateNode.state = tempUpdateNode.state;
+                        temp.tempUpdateNode.folder = tempUpdateNode.folder;
+
+                        treeF.tree('beginEdit',node.target);
+                    }else if(item.name == 'remove' ){
+                        $.messager.confirm('确认','您确认想要删除记录吗？',function(r){
+                            if (r){
+                                //var node = treeF.tree('getSelected');
+                                var removeIds = "";
+                                for (var i =0; i< selectIds.length; i++) {
+                                    removeIds += selectIds[i] + ",";
+                                }
+                                $.post("$!{basepath}/file/delete", {"ids":removeIds}, function(result) {
+                                    $.messager.show({
+                                        title:'删除信息',
+                                        msg: result.message,
+                                    });
+                                    if(!result || result.error == 1) {
+                                        return;
+                                    }
+
+                                    //获取选中节点所有子节点，并全部删除
+                                    var removeNodes = [];
+                                    for (var i = 0; i< selectIds.length; ++i) {
+                                        removeNodes[i] = treeF.tree("find", selectIds[i]);
+                                    }
+                                    console.log(removeNodes);
+                                     for (var i =0 ; i< removeNodes.length; i++) {
+                                        console.log("re----");
+                                        console.log(removeNodes[i]);
+                                         treeF.tree('pop', removeNodes[i].target);
+                                    }
+                                    selectIds = [];
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+
+        },onAfterEdit:function(node){
+            if (node.id == temp.tempUpdateNode.id) {
+                if (node.text != temp.tempUpdateNode.text) {
+                    temp.tempUpdateNode.text = node.text;
+                    $.get("$!{basepath}/file/update", temp.tempUpdateNode, function (result) {
+                            $.messager.show({
+                                title:'更新信息',
+                                msg: result.message,
+                            });
+                    });
+                }
+            }
+        },onCancelEdit:function(node){
+            //alert("onCancelEdit---");
+        }
+    });
+
+
+    /**
+     * 文件详情
+     **/
+
+
+    /**
+     * 分页
+     *
+     */
+    function filePagination(dataTotal, pageSize, pageNumber) {
+        $("#file-pagination-div").pagination({
+            total:dataTotal,
+            pageSize:pageSize,
+            pageNumber: pageNumber,
+            pageList:[10,20,40],
+            showPageList:true,
+            showRefresh: true,
+            layout:['list','sep','first','prev','links','next','last','sep','refresh'],
+            onSelectPage: function (number, size) {
+                isGetP = true;
+                treeF.tree('options').url =treeUrl + "&s=" + number + "&e=" + size;
+                //console.log("pagination")
+                treeF.tree('reload');
+            }
+        });
+    }
+
+    function formatDataForPagination(rows) {
+        console.log("format");
+        console.log(rows);
+        for (var i =0; i < rows.length; i++) {
+            rows[i].text = rows[i].name;
+            rows[i].state = rows[i].children != -1 ? 'closed': 'open';
+            rows[i].folder = rows[i].children != -1 ? true: false;
+            rows[i].checked = rows[i].status == 1 ? true:false;
+        }
+    }
+
+    function fullFileCommentElement(id, name, text, floor, date) {
+        var node = $("<div id='file-comment-div-"+ id +"' file-data-id='"+ id +"' class='list-item reply-wrap' style='margin-top: 21px; margin-left: 30px; '> " +
+            "<div class='user-face' style='float:left'> " +
+            "<a href='#' target='_blank'><img src='$!{basepath}/js/jquery-easyui-1.5.1/themes/icons/back.png' alt=''></a>" +
+            "</div>" +
+            "<div class='con ' >" +
+            "<div class='user'>" +
+            "<a  href='#' target='_blank' class='name' file-data-name='" + name + "'>" + name + "</a>" +
+            "</div>" +
+            "<p class='text' file-data-text='" + text + "'>" + text + "</p>" +
+            "<div class='info'>" +
+            "<span class='floor' file-data-floor='" + floor + "'>" + floor + "</span>" +
+            "<span class='time'>"+ new Date(date).format("yyyy-MM-dd") +"</span>" +
+            "<a href='javascript:void(0)' class='easyui-linkbutton' onclick='replyFileComment(this)'>参与回复</a>" +
+            "</div>" +
+            "<div class='paging-box'></div>" +
+            "</div>" +
+            "</div>");
+        return node;
+    }
+
+    /**
+     * 分页
+     */
+    function fileCommentPagination(dataTotal, pageNumber, pageSize, fid) {
+        $("#file-comment-pagination-div").pagination({
+            total:dataTotal,
+            pageSize:pageSize,
+            pageNumber: pageNumber,
+            pageList:[10,20,40],
+            showPageList:true,
+            showRefresh: true,
+            layout:['list','sep','first','prev','links','next','last','sep','refresh'],
+            onSelectPage: function (number, size) {
+                fileCommentPaginationUrl = "${basepath}/fc/comment?fid=" + fid + "&s=" + number + "&e=" + size;
+                $(fileCommentDiv).children().remove();
+                showFileComment(fileCommentPaginationUrl, fid);
+            },
+            onChangePageSize: function (pageSize) {
+                fileCommentPageSize = pageSize;
+            }
+        });
+    }
+
+    function showFileComment(url, fid) {
+        $.get(url,  function (result) {
+            var message = result.rows;
+            createFileCommentTree(fileCommentDiv, message, 0);
+            fileCommentLastFloor = result.total;
+            fileCommentPageSize = result.pageSize;
+            fileCommentPageNumber = result.pageNumber;
+            fileCommentPagination(result.total, result.pageNumber, result.pageSize, fid );
+        });
+    }
+
+    function createFileCommentTree(parentDiv, data, parentId) {
+        var nodes = getNodesByParentId(data, parentId);
+        console.log(nodes);
+        console.log(parentId);
+        for (var i = 0; i< nodes.length; i++) {
+            var node = $("<div id='file-comment-div-"+ nodes[i].id +"' file-data-id='"+ nodes[i].id +"' class='list-item reply-wrap' style='margin-top: 21px; margin-left: 30px; '> " +
+                "<div class='user-face' style='float:left'> " +
+                "<a href='#' target='_blank'><img src='$!{basepath}/js/jquery-easyui-1.5.1/themes/icons/back.png' alt=''></a>" +
+                "</div>" +
+                "<div class='con ' >" +
+                "<div class='user'>" +
+                "<a  href='#' target='_blank' class='name' file-data-name='" + nodes[i].name + "'>" + nodes[i].name + "</a>" +
+                "</div>" +
+                "<p class='text' file-data-text='" + nodes[i].text + "'>" + nodes[i].text + "</p>" +
+                "<div class='info'>" +
+                "<span class='floor' file-data-floor='" +  nodes[i].floor + "'>" +  nodes[i].floor + "</span>" +
+                "<span class='time'>"+ new Date(nodes[i].created).format("yyyy-MM-dd") +"</span>" +
+                "<a href='javascript:void(0)' class='easyui-linkbutton' onclick='replyFileComment(this)'>参与回复</a>" +
+                "</div>" +
+                "<div class='paging-box'></div>" +
+                "</div>" +
+                "</div>");
+            $(parentDiv).append(node);
+            if (parentId == 0) {
+                var line = $("<hr/>");
+                $(parentDiv).append(line)
+            }
+            createFileCommentTree(node, data, nodes[i].id);
+        }
+    }
+
+    function replyFileComment(div) {
+        var node = $(div).parent().parent().parent();
+        var id = $(node).attr("file-data-id");
+        var floor = $($(div).parent().children()[0]).attr("file-comment-floor");
+        console.log(floor);
+        var name = $($(div).parent().parent().children()[0]).first().html();
+        var text = $($(div).parent().parent().children()[1]).html();
+        $("#file-comment-form input[name='id']").val(id);
+        $("#file-comment-form input[name='floor']").val(floor);
+        var node = $("<div" + " file-data-id="+  id +"' class='list-item reply-wrap' style='margin-top: 21px; margin-left: 30px; '> " +
+            "<div class='user-face' style='float:left'> " +
+            "<a href='#' target='_blank'><img src='$!{basepath}/js/jquery-easyui-1.5.1/themes/icons/back.png' alt=''></a>" +
+            "</div>" +
+            "<div class='con ' >" +
+            "<div class='user'>" +
+            "<a  href='#' target='_blank' class='name' file-data-name='" +  name + "'>" +  name + "</a>" +
+            "</div>" +
+            "<p class='text' file-data-text='" +  text + "'>" +  text + "</p>" +
+            "</div>" +
+            "</div>");
+        replyFileCommentWindow.prepend(node);
+        replyFileCommentWindow.window({
+            title: "append",
+            width:800,
+            height:600,
+            modal:true,
+            onOpen: function (event, ui) {
+                console.log("open")
+                fileCommentKind = KindEditor.create('#reply-file-kind-text', {
+                    resizeType : 1,
+                    allowFileManager: false,
+                    items : [
+                        'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline',
+                        'removeformat', '|', 'justifyleft', 'justifycenter', 'justifyright', 'insertorderedlist',
+                        'insertunorderedlist', '|', 'emoticons',  'link'],
+                    afterBlur: function(){
+                        fileCommentKind.sync();
+                    }
+                });
+            },
+            onBeforeClose:function () {
+                console.log("onBefore")
+                fileCommentKind.remove('#reply-file-kind-text');
+                node.remove();
+
+            },
+        });
+    }
+
+    /**
+     * 提交回复
+     */
+    function submitFileComment() {
+        $(fileCommentForm).form({
+            url: "$!{basepath}/fc/append",
+            onSubmit: function () {
+                if (fileCommentKind) {
+                    fileCommentKind.sync();
+                }
+                return $(this).form('validate');
+            },
+            success: function (result) {
+                var json = eval("(" + result + ")");
+                $.messager.show({
+                    title:'添加信息',
+                    msg: json.message,
+                });
+                var node = fullFileCommentNode(json.object.id,json.object.name, json.object.text, json.object.floor,json.object.created);
+                $("#file-comment-div-" + json.object.parentId).append(node);
+                replyFileCommentWindow.window("close");
+            }
+        });
+        $(fileCommentForm).submit();
+    }
+
+    /**
+     * 提交首页回复
+     */
+    function submitIndexFileComment() {
+        $("#index-file-comment-form > input[name='floor']").val(fileCommentLastFloor);
+        $("#index-file-comment-form").form({
+            url: "$!{basepath}/fc/append",
+            onSubmit: function () {
+                if (fileCommentKind) {
+                    fileCommentKind.sync();
+                }
+                return $(this).form('validate');
+            },
+            success: function (result) {
+                var json = eval("(" + result + ")");
+                $.messager.show({
+                    title:'添加信息',
+                    msg: json.message,
+                });
+                var count  = fileCommentLastFloor/fileCommentPageSize;
+                if (count < fileCommentPageSize) {
+                    var node = fullFileCommentNode(json.object.id,json.object.name, json.object.text, json.object.floor, json.object.created );
+                    $(fileCommentDiv).append(node);
+                }
+                fileCommentPagination(fileCommentLastFloor + 1, fileCommentPageNumber, fileCommentPageSize, json.object.fileId);
+                //replyWindow.window("destroy");
+            }
+        });
+        $("#index-file-comment-form").submit();
+    }
+
+    /**
+     * 提交copy文件信息
+     */
+    function submitCopyFiles() {
+        $("#copy-files-input").val(selectIds);
+        var node = $(copyTree).tree("getSelected");
+        if ( node.folder == null || node == 'undefined'|| node.folder == 'undefined' || node.folder != true) {
+            myMessager("请选择一个文件夹");
+            return;
+        }
+        $("#target-folder").val(node.id);
+        $(copyFilesForm).form({
+            url: "$!{basepath}/file/copy",
+            onSubmit: function () {
+                return $(this).form('validate');
+            },
+            success: function (result) {
+                var json = eval("(" + result + ")");
+                $.messager.show({
+                    title: '添加信息',
+                    msg: json.message,
+                });
+                $(copyFilesForm).form("reset");
+                var folder = treeF.tree("find", node.id);
+                treeF.tree("reload", folder.target);
+                $("#copy-tree-window").window("destroy");
+            }
+        });
+        $(copyFilesForm).submit();
+    }
+
+    function fullFileCommentNode(id, name, text, floor, date) {
+        var node = $("<div id='file-comment-div-"+ id +"' file-data-id='"+ id +"' class='list-item reply-wrap' style='margin-top: 21px; margin-left: 30px; '> " +
+            "<div class='user-face' style='float:left'> " +
+            "<a href='#' target='_blank'><img src='$!{basepath}/js/jquery-easyui-1.5.1/themes/icons/back.png' alt=''></a>" +
+            "</div>" +
+            "<div class='con ' >" +
+            "<div class='user'>" +
+            "<a  href='#' target='_blank' class='name' file-data-name='" + name + "'>" + name + "</a>" +
+            "</div>" +
+            "<p class='text' file-data-text='" + text + "'>" + text + "</p>" +
+            "<div class='info'>" +
+            "<span class='floor' file-data-floor='" +  floor + "'>" +  floor + "</span>" +
+            "<span class='time'>"+ new Date(date).format("yyyy-MM-dd") +"</span>" +
+            "<a href='javascript:void(0)' class='easyui-linkbutton' onclick='replyFileComment(this)'>参与回复</a>" +
+            "</div>" +
+            "<div class='paging-box'></div>" +
+            "</div>" +
+            "</div>");
+        return node;
+    }
+
+
+    var KEY = { SHIFT:16, CTRL:17, ALT:18, DOWN:40, RIGHT:39, UP:38, LEFT:37};
+    function onTreeKeyDown(event){//响应键盘按下事件
+        var e = event || window.event;
+        var code = e.keyCode | e.which | e.charCode;
+        switch(code) {
+            case KEY.SHIFT:
+                break;
+            case KEY.CTRL:
+                ctrlDown = true;
+                ctrlUp = false;
+                break;
+            default: break;
+        }
+    }
+
+    function onTreeKeyUp(event){//响应键盘松开事件
+        var e = event || window.event;
+        var code = e.keyCode | e.which | e.charCode;
+        switch(code) {
+            case KEY.SHIFT:
+                break;
+            case KEY.CTRL:
+                ctrlDown = false;
+                ctrlUp = true;
+                break;
+            default: break;
+        }
+    }
+
+    function findCopyId(ids, id) {
+        for (var i = 0; i < ids.length; i++) {
+            if(ids[i] == id) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+</script>

@@ -1,0 +1,276 @@
+<!doctype html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="edge" />
+        #parse("common/common.html")
+        #parse("common/common-easyui.html")
+        <link rel="shortcut icon" href="favicon.ico" />
+        <title>onkshare</title>
+<link href="$!basepath/js/EasyUI-1.5.1-InsdepTheme-1.0.1/themes/insdep/easyui_animation.css" rel="stylesheet" type="text/css">
+
+<link href="$!basepath/js/EasyUI-1.5.1-InsdepTheme-1.0.1/themes/insdep/easyui_plus.css" rel="stylesheet" type="text/css">
+
+<!--
+    2017/03/22 新增
+    plugin/font-awesome-4.7.0/css/font-awesome.min.css
+    第三方图标库样式，用于显示左侧菜单栏图标，根据需要自行引入
+-->
+<link href="$!basepath/js/EasyUI-1.5.1-InsdepTheme-1.0.1/plugin/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+</head>
+
+<body>
+	<div id="master-layout">
+        <div data-options="region:'north',border:false,bodyCls:'theme-header-layout'">
+        	<div class="theme-navigate">
+                <div class="left">
+                    <a href="#" class="easyui-linkbutton left-control-switch"><i class="fa fa-bars fa-lg"></i></a>
+                    <a id="login-after-a" href="#" class="easyui-menubutton theme-navigate-user-button user-name-cl" data-options="menu:'.theme-navigate-user-panel'" style="display: none">登录</a>
+                    <a id="login-before-a" href="#" class="easyui-menubutton" data-options="hasDownArrow:false"  onclick="login()">登录</a>
+                    <a id="register-a" href="#" class="easyui-menubutton" data-options="hasDownArrow:false"  onclick="register()">注册</a>
+
+
+                    <div  class="theme-navigate-user-panel" style="display: none">
+                       <dl>
+                       		<dd>
+                            	<img src="$!basepath/js/EasyUI-1.5.1-InsdepTheme-1.0.1/themes/insdep/images/portrait86x86.png" width="86" height="86">
+                                <b class="badge-prompt user-name-cl">匿名</b>
+                                <span>examples@insdep.com</span>
+                                <p>安全等级：<i class="text-success">高</i></p>
+                            </dd>
+                            <dt>
+                            	<a class="theme-navigate-user-modify">修改资料</a>
+                                <a onclick="logout()" class="theme-navigate-user-logout">注销</a>
+                            </dt>
+                       </dl>
+                    </div>
+                </div>
+                <div class="right">
+
+                    <a id="more-a" href="#" class="easyui-menubutton theme-navigate-more-button" data-options="menu:'#more',hasDownArrow:false"></a>
+                    <div id="more" class="theme-navigate-more-panel easyui-menu" data-options=" onClick:menuHandler">
+                    	<div>联系我</div>
+                        <div>参与改进计划</div>
+                        <div>关于</div>
+                    </div>
+                </div>
+            </div>
+        
+        </div>
+
+        <!--开始左侧菜单-->
+        <div data-options="region:'west',border:false,bodyCls:'theme-left-layout'" style="width:200px;">
+
+
+            <!--正常菜单--> 
+            <div class="theme-left-normal">
+                <!--theme-left-switch 如果不需要缩进按钮，删除该对象即可-->    
+                <div class="left-control-switch theme-left-switch"><i class="fa fa-chevron-left fa-lg"></i></div>
+
+                <!--start class="easyui-layout"-->
+                <div class="easyui-layout" data-options="border:false,fit:true"> 
+                    <!--start region:'north'-->
+                    <div data-options="region:'north',border:false" style="height:100px;">
+                        <!--start theme-left-user-panel-->
+                        <div class="theme-left-user-panel">
+                            <dl>
+                                <dt>
+                                    <img src="$!basepath/js/EasyUI-1.5.1-InsdepTheme-1.0.1/themes/insdep/images/portrait86x86.png" width="43" height="43">
+                                </dt>
+                                <dd>
+                                    <b class="badge-prompt user-name-cl">匿名 </b>
+                                    <span>examples</span>
+                                </dd>
+
+                            </dl>
+                        </div>
+                        <!--end theme-left-user-panel-->
+                    </div>   
+                    <!--end region:'north'-->
+
+                    <!--start region:'center'-->
+                    <div data-options="region:'center',border:false">
+
+                        <!--start easyui-accordion--> 
+                        <div class="easyui-accordion" data-options="border:false,fit:true">   
+                            <div title="用户管理">
+                                <ul class="easyui-datalist" data-options="border:false,fit:true">
+                                    <li class="open" url='/page/user-info'>个人信息</li>
+                                </ul>
+                            </div>   
+                            <div title="文件管理">
+                                <ul class="easyui-datalist" data-options="border:false,fit:true,selected:true">
+                                    <li data-options="url:'file-search'">搜索文件</li>
+                                    <li data-options="url:'/page/file-list'">文件管理</li>
+                                </ul>
+                            </div>   
+                            <div title="网站内容管理">
+                                <ul class="easyui-datalist" data-options="border:false,fit:true">
+                                    <li data-options="url:'web-message'">留言板</li>
+                                    <li data-options="url:'notification'">公告</li>
+                                </ul>
+                            </div>
+                            <div title="个人设置">
+                                <ul class="easyui-datalist" data-options="border:false,fit:true">
+                                    <!--<li data-options="url:'/page/log-info'">登录记录</li>-->
+                                    <li>修改密码</li>
+                                </ul>      
+                            </div>
+
+                        </div>
+                        <!--end easyui-accordion--> 
+
+                    </div>
+                    <!--end region:'center'-->
+                </div>  
+                <!--end class="easyui-layout"-->
+
+            </div>
+            <!--最小化菜单--> 
+            <div class="theme-left-minimal">
+                <ul class="easyui-datalist" data-options="border:false,fit:true">
+                    <li><a class="left-control-switch"><i class="fa fa-chevron-right fa-2x"></i><p>打开</p></a></li>
+                </ul>
+            </div>
+
+        </div>
+        <!--结束左侧菜单--> 
+
+        <div data-options="region:'center',border:false,href:'file-search'"  id="control" style="padding:20px; background:#fff;">
+
+        </div>
+    </div>
+
+
+
+    <script>
+
+
+
+    	$(function(){
+			/*布局部分*/
+			$('#master-layout').layout({
+				fit:true/*布局框架全屏*/
+			});   
+
+            var left_control_status=true;
+            var left_control_panel=$("#master-layout").layout("panel",'west');
+
+            $(".left-control-switch").on("click",function(){
+                if(left_control_status){
+                    left_control_panel.panel('resize',{width:50});
+                    left_control_status=false;
+                    $(".theme-left-normal").hide();
+                    $(".theme-left-minimal").show();
+                }else{
+                    left_control_panel.panel('resize',{width:200});
+                    left_control_status=true;
+                    $(".theme-left-normal").show();
+                    $(".theme-left-minimal").hide();
+                }
+                $("#master-layout").layout('resize', {width:'100%'})
+            });
+
+			$(".theme-navigate-user-modify").on("click",function(){
+                $('.theme-navigate-user-panel').menu('hide');
+				$.insdep.window({id:"personal-set-window",href:"user-update.html",title:"修改资料"});
+
+            }); 
+			//$.insdep.control("list.html");
+
+			//var cc1=$('#cc1').combo('panel');
+			//cc1.panel({cls:"theme-navigate-combobox-panel"});
+			//var cc2=$('#cc2').combo('panel');
+			//cc2.panel({cls:"theme-navigate-combobox-panel"});
+			
+		});
+
+    	/**
+         * more-a
+         */
+    	function menuHandler(item) {
+            var center = $("#master-layout").layout("panel", "center");
+
+             switch (item.text) {
+                 case "联系我":
+                 case "参与改进计划":
+                 case "关于":
+                 default:
+                     $(center).panel("refresh", "contact-me");
+                     break;
+             }
+        }
+
+        /**
+         * 菜单
+         */
+        $(".easyui-datalist").datalist({
+            onClickRow:function (rowIndex, rowData) {
+                var center = $("#master-layout").layout("panel", "center");
+                if (rowData.text == '个人信息') {
+                    $(center).panel('refresh','page/user-info');
+                }else if (rowData.text == '搜索文件') {
+                    $(center).panel('refresh','file-search');
+                }else if (rowData.text == '文件管理') {
+                    $(center).panel('refresh','page/file-list');
+                }else if (rowData.text == '留言板') {
+                    $(center).panel('refresh','web-message');
+                }else if (rowData.text == '公告') {
+                    $(center).panel('refresh','notification');
+                }else if (rowData.text == '修改密码'){
+                    $(center).panel('refresh','page/password-update');
+                }
+            }
+        });
+
+
+		$.get("$!{basepath}/user/current", function (result) {
+            if (result && result.error == 0) {
+                var list = $(".user-name-cl");
+                for (var i = 0 ; i< list.length; i++) {
+                    $(list[i]).text(result.object.username);
+                }
+
+                $("#login-before-a").hide();
+                $("#register-a").hide();
+                $("#login-after-a").show();
+            }
+        });
+
+        /**
+         * login
+         */
+        function login() {
+            var center = $("#master-layout").layout("panel", "center");
+            $(center).panel('refresh','login');
+        }
+
+        /**
+         * login
+         */
+        function register() {
+            var center = $("#master-layout").layout("panel", "center");
+            $(center).panel('refresh','register');
+        }
+
+
+        /**
+         *logout
+         */
+
+        function logout() {
+            $.get("$!{basepath}/user/logout", function (result) {
+                if(result && result.error == 0) {
+                    window.location.href = "$!{basepath}/logout.html";
+                    return;
+                }
+                myMessager(result.message);
+            });
+        }
+
+    </script>
+
+</body>
+</html>

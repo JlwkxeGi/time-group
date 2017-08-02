@@ -1,0 +1,287 @@
+<!--<link rel="stylesheet" href="$!{basepath}/js/kindeditor-4.1.1/themes/default/default.css"
+      xmlns="http://java.sun.com/jsf/html"/>
+<script type="text/javascript" src="$!{basepath}/js/kindeditor-4.1.1/kindeditor.js"></script>
+<script type="text/javascript" src="$!{basepath}/js/kindeditor-4.1.1/lang/zh_CN.js"></script>-->
+
+<div class="search-menu">
+    <div data-options="name:'all',iconCls:'icon-ok'">All</div>
+    <div data-options="name:'shared'">Shared</div>
+    <div data-options="name:'notShared'">notShared</div>
+</div>
+
+<div id="index-search-share-file-div"  style="text-align:center;  margin: 10px;">
+    <input id="index-search-share-file" class="easyui-searchbox search-share-input-cl"  style="width: 400px; height: auto; "/>
+</div>
+
+<div id="share-file-layout-div" class="easyui-layout" data-options="fit:true" style="width:auto;height:720px; display: none">
+    <div  data-options="region:'north', iconCls:'icon-ok'" title="search"   style="height:80px; width: 100%">
+        <div id="file-search" style="text-align:center; margin: 10px">
+            <input  class="easyui-searchbox search-share-input-cl"  style="width: 400px   "/>
+        </div>
+    </div>
+    <div id="share-tree-div" data-options="region:'center',split:true ,iconCls:'icon-ok'" title="文件"   style="height:auto;">
+        <div id="share-rightclick" class="easyui-menu" style="width: 115px;">
+            <div data-options="iconCls:'icon-search',name:'downloadFile'">下载</div>
+        </div>
+        <ul  id="share-file-tree"></ul>
+        <div id="share-file-pagination-div"></div>
+    </div>
+    <div  data-options="region:'east',split:true" title="文件信息" style="width:50%; padding: 5px;">
+        <div id="share-accordion-div" class="easyui-accordion" data-options="fit:true,border:false" >
+            <div id="share-description-div" title="文件详情"  style="padding:10px;">
+            </div>
+            <div id="share-brief-div" data-options=" selected:true" title="文件简述" style="padding:10px;">
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+    //
+    var shareTree = $("#share-file-tree");
+    var shareTreeUrl = "";
+    var isSearch = true;
+
+
+    var width = $(window).width()-20;
+    var height = $(window).height()-20;
+
+/**
+ * search-file
+ */
+    $(".search-share-input-cl").searchbox({
+        searcher:function (value, name) {
+            console.log(name);
+            var shared = 1;
+            if (name == 'all') {
+                shared = -1;
+            }else if (name == 'notShared') {
+                shared = 0;
+            }
+            isSearch = true;
+            $("#index-search-share-file-div").hide();
+            $("#share-file-layout-div").show();
+            $("#share-file-layout-div").layout("resize");
+            shareTreeUrl = "$!{basepath}/search?q=" + value + "&shared=" + shared;
+            showShareTree();
+        },
+        menu:'.search-menu',
+        prompt:'请输入关键字!!'
+    });
+
+
+    /**
+     * 分页
+     *
+     */
+    function shareFilePagination(dataTotal, pageSize, pageNumber) {
+        $("#share-file-pagination-div").pagination({
+            total:dataTotal,
+            pageSize:pageSize,
+            pageNumber: pageNumber,
+            pageList:[10,20,40],
+            showPageList:true,
+            showRefresh: true,
+            layout:['list','sep','first','prev','links','next','last','sep','refresh'],
+            onSelectPage: function (pageNumber, pageSize) {
+                isSearch = true;
+                shareTree.tree('options').url =shareTreeUrl + "&s=" + pageNumber + "&e=" + pageSize;
+                shareTree.tree('reload');
+            }
+        });
+    }
+
+
+    /**
+     * accordion
+     */
+    $("#share-accordion-div").accordion({
+        onSelect:function (title,index) {
+            var data = shareTree.tree('getSelected');
+            if (!data) {
+                return;
+            }
+            if (title == "文件详情") {
+                fileDetails($("#share-description-div"),data.id);
+            }else {
+                $("#share-brief-div").html(
+                    "<p>id: "+data.id+"<p/>" +
+                    "<p>text: "+data.text+"<p/>" +
+                    "<p>url: "+data.url+"<p/>" +
+                    "<p>state: "+data.state+"<p/>" +
+                    "<p>folder: "+data.folder+"<p/>" +
+                    "<p>attraction: "+data.attraction+"<p/>" +
+                    "<p>level: "+data.level+"<p/>" +
+                    "<p>created: "+data.created +"<p/>" +
+                    "<p>updated: "+data.updated +"<p/>" +
+                    "<p>status: "+data.status +"<p/>" +
+                    "<p>worth: "+data.worth +"<p/>"
+                );
+            }
+        },
+    });
+
+
+    /**
+     * 文件树
+     */
+    function showShareTree() {
+        shareTree.tree({
+            url: shareTreeUrl,
+            method: 'get',
+            dnd: true,
+            lines: true,
+            formatter: function (node) {
+                if (node.status == 1) {
+                    var result = "<span ><font color='blue'>*</font></span>" + "&nbsp&nbsp&nbsp<span >"+ node.text  +"</span>";
+                    return result;
+                }else if (node.status == 2) {
+                    var result = "<span ><font color='red'>-></font></span>" + "&nbsp&nbsp<span >"+ node.text  +"</span>";
+                    return result;
+                }else if (node.status == 3) {
+                    var result = "&nbsp&nbsp<span ><font color='red'>无文件 </font></span>";
+                    return result;
+                }
+                var result ="&nbsp&nbsp&nbsp&nbsp<span >"+ node.text  +"</span>";
+                return result;
+            },
+            loadFilter: function (result) {
+                //设置分页
+                console.log("load");
+                if (isSearch) {
+                    shareFilePagination(result.total, result.pageSize, result.pageNumber);
+                }
+                isSearch = false;
+
+                var data ;
+                if (result.rows) {
+                    data = result.rows;
+                }else {
+                    data = result;
+                }
+                return data;
+            },
+            onLoadSuccess:function (node,result) {
+                var data ;
+                if (result.rows) {
+                    data = result.rows;
+                }else {
+                    data = result;
+                }
+                console.log(data);
+                if(temp.isShare) {
+                    tree.tree("expandAll");
+                    tree.tree("collapseAll");
+                }
+                /*var all = tree.tree("getChildren");
+                 console.log(all);
+                 for (var j =0; j< all.length; j++) {
+                 if (all[j].status == 2 && all[j].indeterminate) {
+                 //var target = tree.tree("find", all[j].id);
+                 var div = $('#' + all[j].domId + "> .tree-checkbox");
+                 div.removeClass("tree-checkbox tree-checkbox0 tree-checkbox1 tree-checkbox2");
+                 div.addClass("tree-checkbox tree-checkbox2");
+                 all[j].indeterminate = false;
+                 }
+                 }*/
+            },
+            onClick: function (data) {
+                $("input[name='uploadPathId']").attr("folder", data.folder);
+                $("input[name='uploadPathId']").val(data.id);
+
+                //
+                $("#share-brief-div").html(
+                    "<p>id: "+data.id+"<p/>" +
+                    "<p>text: "+data.text+"<p/>" +
+                    "<p>url: "+data.url+"<p/>" +
+                    "<p>state: "+data.state+"<p/>" +
+                    "<p>folder: "+data.folder+"<p/>" +
+                    "<p>attraction: "+data.attraction+"<p/>" +
+                    "<p>level: "+data.level+"<p/>" +
+                    "<p>created: "+data.created +"<p/>" +
+                    "<p>updated: "+data.updated +"<p/>" +
+                    "<p>status: "+data.status +"<p/>" +
+                    "<p>worth: "+data.worth +"<p/>"
+                );
+                $("#share-accordion-div").accordion("select",1);
+
+            },
+            onDblClick: function (node) {
+                //$(this).tree('beginEdit',node.target);
+            },
+            onBeforeDrop: function (target, source, point) {
+                if (point != "append") return false;
+                var targetN = tree.tree('getNode', target);
+                if (targetN.folder == false || targetN.folder == "false") {
+                    return false;
+                }
+
+                var targetN = tree.tree('getNode', target);
+                var children = tree.tree('getChildren', targetN);
+                console.log(targetN);
+                console.log(source);
+                $.post("$!{basepath}/file/move", {"parentId":targetN.id, "targetFileId": source.id}, function (result) {
+                    console.log(result);
+                    myMessager(result);
+                });
+
+            },
+            onContextMenu:function(e, node){
+                e.preventDefault();
+                var id = node.id;
+
+                var right =  $('#share-rightclick');
+
+                right.menu({
+                    onClick:function(item){
+                        if (item.name == 'viewAll') {
+                            shareTree.tree("reload");
+                        }else if (item.name == 'viewCurrentAll'){
+                            var target = shareTree.tree("getRoot", node.target);
+                            shareTree.tree("reload", target.target);
+                        }else if (item.name == 'viewCurrentShared'){
+                            closeShare(shareTree);
+                            $.get("$!{basepath}/file/share/list",{"id":node.id}, function(result) {
+                                if (!result) {
+                                    myMessager({title:"获取信息", msg: "获取失败!!"});
+                                    return;
+                                }
+                                var target = shareTree.tree("getRoot", node.target);
+                                var children = shareTree.tree("getChildren", target.target);
+                                for (var i = children.length - 1; i >= 0 ; i--) {
+                                    shareTree.tree("remove", children[i].target);
+                                }
+
+                                shareTree.tree("append",{"parent":target.target, "data":result.length > 0 ? result : {'id':'','text':'',"status":3}});
+                            });
+                        }else if (item.name == 'downloadFile') {
+                            downloadFile(shareTree);
+                        }
+                    }
+                });
+
+                right.menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+
+            },onAfterEdit:function(node){
+                if (node.id == temp.tempUpdateNode.id) {
+                    if (node.text != temp.tempUpdateNode.text) {
+                        temp.tempUpdateNode.text = node.text;
+                        $.get("$!{basepath}/file/update", temp.tempUpdateNode, function (result) {
+                            $.messager.show({
+                                title:'更新信息',
+                                msg: result.message,
+                            });
+                        });
+                    }
+                }
+            },onCancelEdit:function(node){
+                //alert("onCancelEdit---");
+            }
+        });
+    }
+
+
+</script>

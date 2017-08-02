@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base href="time-manager/manager"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>管理员登录</title>
+	#set($basepath = '/time-manager/manager')
+	<link rel="stylesheet" type="text/css" href="$!{basepath}/css/onkshop.css" />
+	<script type="text/javascript" src="$!basepath/js/jquery-1.8.3.min.js"></script>
+	<script type="text/javascript" src="$!basepath/js/handlebars-v4.0.5.js"></script>
+	<script type="text/javascript" src="$!{basepath}/js/local/common.js"></script>
+	<script type="text/javascript" src="$!basepath/js/jquery-easyui-1.5.1/jquery.easyui.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="$!basepath/js/jquery-easyui-1.5.1/themes/default/easyui.css">
+	<link rel="stylesheet" type="text/css" href="$!basepath/js/jquery-easyui-1.5.1/themes/icon.css">
+	<link rel="stylesheet" type="text/css" href="$!basepath/js/jquery-easyui-1.5.1/demo/demo.css">
+</head>
+<body style="background-color: #EBF2FF">
+	<div  style="height:80px; text-align: center" >
+			<!--<span style="color: #5886D3; font-size: 3em">onkshare</span>-->
+			<img src="$!{basepath}/static-file/top.png" />
+	</div>
+
+	   <div class="easyui-dialog" title="管理员登录" data-options="closable:false,draggable:false" style="width:400px;height:300px;padding:10px;">
+		   <form action="$!{basepath}/user/login" method="post">
+			   <div style="margin-left: 50px;margin-top: 50px;">
+				   <div style="margin-bottom:20px;">
+					   <div>
+						   用户名: <input name="username" class="easyui-textbox" data-options="required:true" style="width:200px;height:32px"/>
+					   </div>
+				   </div>
+				   <div style="margin-bottom:20px">
+					   <div>
+						   密&nbsp;&nbsp;码: <input name="password" class="easyui-textbox" type="password" style="width:200px;height:32px" data-options="required:true"/>
+					   </div>
+				   </div>
+				   <div>
+					   <input id="login" type="submit"  value="登录" class="easyui-linkbutton" iconCls="icon-ok" style="width:100px;height:32px;margin-left: 50px"/>
+				   </div>
+			   </div>
+		   </form>
+	   </div>
+
+</body>
+</html>

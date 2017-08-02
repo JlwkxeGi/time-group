@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="time-client" />
+        <module name="time-common" />
+        <module name="time-dao" />
+        <module name="time-manager" />
+        <module name="time-mapper" />
+        <module name="time-model" />
+        <module name="time-search" />
+        <module name="time-service" />
+        <module name="time-service-api" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="time-client" target="1.7" />
+      <module name="time-common" target="1.7" />
+      <module name="time-dao" target="1.7" />
+      <module name="time-manager" target="1.7" />
+      <module name="time-mapper" target="1.7" />
+      <module name="time-model" target="1.7" />
+      <module name="time-parent" target="1.7" />
+      <module name="time-search" target="1.7" />
+      <module name="time-service" target="1.7" />
+      <module name="time-service-api" target="1.7" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
